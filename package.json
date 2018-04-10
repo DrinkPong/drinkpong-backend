@@ -1,0 +1,33 @@
+{
+  "name": "beerpong-robot-ui",
+  "version": "1.0.0",
+  "description": "A UI for the most awesome beerpong robot",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/frewinchristopher/beerpong-robot-ui.git"
+  },
+  "keywords": [
+    "beerpong",
+    "robot",
+    "chuck",
+    "norris",
+    "jokes"
+  ],
+  "author": "Christopher Frewin",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/frewinchristopher/beerpong-robot-ui/issues"
+  },
+  "homepage": "https://github.com/frewinchristopher/beerpong-robot-ui#readme",
+  "dependencies": {
+    "body-parser": "^1.18.2",
+    "chuck-norris-jokes": "^0.1.1",
+    "express": "^4.16.3",
+    "morgan": "^1.9.0",
+    "say": "^0.14.0"
+  }
+}
