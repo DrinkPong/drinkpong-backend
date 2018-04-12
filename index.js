@@ -2,6 +2,7 @@ const express = require('express');
 const morgan = require('morgan');
 const path = require('path');
 const app = express();
+var cors = require('cors')
 var fs = require('fs');
 var bodyParser = require('body-parser');
 var server;
@@ -17,6 +18,9 @@ var routes = require('./routes');
 //   port: process.env.NLP_CHAMPS_DB_PORT,
 // });
 // client.connect();
+
+// CORS
+app.use(cors());
 
 // bodyParser to get posts from $.ajax
 app.use(bodyParser.json());
