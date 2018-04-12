@@ -15,3 +15,8 @@ This project is meant to be run in a raspberry pi 2 or higher. In order to run t
 
 The application expects a source of images to be configured in the Raspberry.
 
+## Tools
+
+- GitHub
+- Slack 
+- Draw.io (graphs)
