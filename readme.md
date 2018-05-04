@@ -9,7 +9,7 @@ This project is meant to be run in a raspberry pi 2 or higher. In order to run t
 1. Download and install Raspbian 
 1. Follow these instructions to install Python and OpenCV
 1. ...
-1. Profit!
+1. Profit!!
 
 ## Requirements
 
