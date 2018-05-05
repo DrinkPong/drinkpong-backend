@@ -44,9 +44,6 @@ class DrinkPongBot {
     this.oIO = oIO;
     q.push({sTextToSpeak: "Initialization complete. Awaiting commands from UI or info from Pi."});
     this.oIO.emit('drinkPongBotInitialized', {sTheta: fTheta.toString(), });
-
-    oLaunchLeverServo.on('move:complete', this.launchLeverServoCompleteHandler); // register complete event for the launch servo
-
   }
   // setters on the two angles - when they are updated, we need to issue a command to the servos so they are also updated
   set fTheta(fTheta) {
@@ -100,36 +97,46 @@ class DrinkPongBot {
   launch() {
     q.push({sTextToSpeak: "Launching!"});
     if (this.bWithBoard) {
-
+	var that = this;
       // jump start the motors
       q.push({sTextToSpeak: "Jump starting and spooling up."});
-      jumpStartMotors();
+      //this.jumpStartMotors();
 
       // after 100 ms jump start, set the actual desired speed
       setTimeout(function() {
-        setMotorSpeedPercent(this.fMotorSpeedPercent)
-      }, 100);
+        that.startMotors();
+      }, 500);
 
-      // after 2 seconds, push the ball into the cannon
+      // after 3 seconds, push the ball into the cannon
       setTimeout(function() {
         q.push({sTextToSpeak: "Pushing ball into cannon!"});
-        this.oLaunchLeverServo.to(180,1000);
+        that.oLaunchLeverServo.to(0);
       }, 2000);
+
+	setTimeout(function() {
+	that.stopMotors()
+	},3000);
 
     }
   }
+  startMotors() {
+if (this.bWithBoard) {
+	that.oLaunchMotorLeft.start(this.fMotorSpeedPercent*255);
+       that.oLaunchMotorRight.start(this.fMotorSpeedPercent*255);
+     }
+  }
   // reset launch servo arm
-  launchLeverServoCompleteHandler() {
+  stopMotors() {
     var that = this;
     if (this.bWithBoard) {
       // immediately stop motors; ball has launched
       q.push({sTextToSpeak: "Stopping launch motors!"});
-      this.oLauchMotorLeft.stop();
-      this.oLauchMotorLeft.stop();
+      this.oLaunchMotorLeft.stop();
+      this.oLaunchMotorRight.stop();
       // after 2 seconds, return the launch servo back to initial position
       setTimeout(function() {
         q.push({sTextToSpeak: "Returning launch lever to initial position."});
-        this.oLaunchLeverServo.to(0); // return the launch servo back to initial position
+        that.oLaunchLeverServo.to(180); // return the launch servo back to initial position
       }, 2000);
 
       setTimeout(function() {
@@ -139,8 +146,8 @@ class DrinkPongBot {
   }
   jumpStartMotors() {
     // always need to jumpstart motors
-    this.oLaunchMotorLeft.start(250);
-    this.oLaunchMotorRight.start(250);
+    this.oLaunchMotorLeft.start(255);
+    this.oLaunchMotorRight.start(255);
   }
   tellJoke() { // wrapper for our bot to use the say speak function
     // chuck.hitme().then((sChuckNorrisJoke) => {
@@ -204,16 +211,7 @@ class DrinkPongBot {
   setMotorSpeedPercent(sMotorSpeedPercent) {
     var iMotorSpeedPercent = parseInt(sMotorSpeedPercent);
     this.fMotorSpeedPercent = (iMotorSpeedPercent / 100 ).toFixed(2); // float with 2 decimal
-    if (this.bWithBoard) {
-      // for any change of motor speed, we need to start the motors with a high value
-      jumpStartMotors();
-
-      setTimeout(function() {
-        this.oLaunchMotorLeft.start(this.fMotorSpeedPercent*255); // the fraction of max to set the motors
-        this.oLaunchMotorRight.start(this.fMotorSpeedPercent*255);
-      }, 100);
-      q.push({sTextToSpeak: "Motors set to " + sMotorSpeedPercent + " percent!"});
-    }
+      q.push({sTextToSpeak: "Motor speed set to " + sMotorSpeedPercent + " percent!"});
   }
   stopMotors() {
     if (this.bWithBoard) {
