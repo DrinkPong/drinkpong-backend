@@ -11,11 +11,11 @@ const fGravity = 9.80723; // m/s^2, from https://www.sensorsone.com/local-gravit
 // TODO: drag? probably only matters for long shots
 
 // back out velocity from time and force of launcher (as alternative to just knowing the velocity)
-let v_0 = fTime*fForce / fMass;
+// let v_0 = fTime*fForce / fMass;
 
 function getMaxHeight() {
   console.log('in get max height');
-  return (0.5*fVelocity_0^2 / fGravity).toFixed(2); // newtonian mecanics; peak of trajectory (TODO: do we need to offset by cup height?)
+  return (0.5*fVelocity_0**2 / fGravity).toFixed(3); // newtonian mecanics; peak of trajectory (TODO: do we need to offset by cup height?)
 }
 
 function getTheta(fTargetCupX) {
