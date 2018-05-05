@@ -2,6 +2,7 @@ import cv2
 import numpy as np
 import math
 import yaml
+import os
 
 def distance_to_camera(knownWidth, focalLength, perWidth):
     	# compute and return the distance from the maker to the camera
@@ -42,28 +43,39 @@ ret, img = cap.read()
 ret, img = cap.read()
 ret, img = cap.read()
 
-undistortedframe = cv2.undistort(img, mtxloaded, distloaded, None, newcameramtx)
-
-x,y,w,h = roi
-
-frame = undistortedframe[y:y+h, x:x+w] 
-
-# Haar only works in gray images
-gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-
-cups = cup_cascade.detectMultiScale(gray, 1.3, 5)
-
-focalLength = (KNOWN_PIXEL_WIDTH * KNOWN_DISTANCE) / KNOWN_WIDTH
-
+os.remove("result.json")
 steve = open("result.json", "w")
 steve.write("{")
 
-steve.write("}")
+iteration = 0
+cups = []
 
-counter = 0
+while iteration < 50 :
+
+
+	undistortedframe = cv2.undistort(img, mtxloaded, distloaded, None, newcameramtx)
+	
+	x,y,w,h = roi
+	
+	frame = undistortedframe[y:y+h, x:x+w] 
+	
+	# Haar only works in gray images
+	gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+	
+	iteration_cups = cup_cascade.detectMultiScale(gray, 1.3, 5)
+
+	if len(iteration_cups) > len(cups):
+		cups = iteration_cups
+
+	iteration = iteration + 1
+
+
+focalLength = (KNOWN_PIXEL_WIDTH * KNOWN_DISTANCE) / KNOWN_WIDTH
+
+cup_counter = 0
 
 for (x,y,w,h) in cups:
-    #cv2.rectangle(frame,(x,y),(x+w,y+h),(255,0,0),2)
+	#cv2.rectangle(frame,(x,y),(x+w,y+h),(255,0,0),2)
 
 	distance_x = distance_to_camera(KNOWN_WIDTH, focalLength, w)
 
@@ -85,13 +97,13 @@ for (x,y,w,h) in cups:
 	distance_y =   (middle_x - frame.shape[0]/2 ) * (3.0/8.0) * (frame.shape[1] - middle_y) / frame.shape[1]
 
 
-	if count is not 0:
+	if cup_counter != 0:
 		steve.write(",")
 	steve.write("{") 
-	steve.write('"x":'+distance_x) 
-	steve.write('"y":'+distance_y) 
+	steve.write('"x":'+str(distance_x)) 
+	steve.write('"y":'+str(distance_y)) 
 	steve.write("}") 
-	count = count + 1
+	cup_counter = cup_counter + 1
 
 
     #    distance_x_text = "% 2.1f" % (distance_x)
@@ -118,6 +130,7 @@ for (x,y,w,h) in cups:
 
 # When everything done, release the capture
 
+steve.write("}")
 steve.close()
 
 cap.release()
