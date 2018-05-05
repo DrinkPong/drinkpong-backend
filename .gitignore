@@ -1,3 +1,6 @@
 node_modules
 .DS_Store
 result.json
+.vscode
+elipse_examples
+tests
