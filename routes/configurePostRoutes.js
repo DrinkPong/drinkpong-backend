@@ -3,8 +3,10 @@
 // configures the post routes of the express router - returns an object of functions which are equivalent to the request paths
 function configurePostRoutes(oDrinkPongBot) {
   
+  const fs = require('fs');
   const utils = require('../utils/utils');
-  
+  var PythonShell = require('python-shell');
+
   return {
     // speak a joke endpoint
     postJoke: (req, res) => {
@@ -51,21 +53,22 @@ function configurePostRoutes(oDrinkPongBot) {
     },
     
     postCupCoordinatesFromCamera: (req, res) => {
-      // var options = {
-      //   scriptPath: './',
-      // }
-      // PythonShell.run('calculatecoordinates.py', options, function (err, data) {
-      //   console.log(err);
-      //   console.log(data);
-      //   oJSON = JSON.parse(fs.readFileSync('coordinates.json', 'utf8'));
-      //   console.log(JSON.stringify(data[0]));
-      //   if (err) res.send(err);
-      //   res.send(JSON.stringify(oJSON));
-      // });
-      var fX = utils.getRandomFloat(0,1).toFixed(2);
-      var fY = utils.getRandomFloat(0,0.25).toFixed(2);
-      //oIO.emit('cupTargetCoordinatesSetEvent', {sTargetCupX: fX, sTargetCupY: fY}); 
-      oDrinkPongBot.targetCup(req.body.bLaunchAfterTargetLock, fX, fY)
+      var options = {
+        scriptPath: '../',
+      }
+      PythonShell.run('aim_script.py', options, function (err, data) {
+        console.log(err);
+        console.log(data);
+        oJSON = JSON.parse(fs.readFileSync('result.json', 'utf8'));
+        console.log(JSON.stringify(data[0]));
+        if (err) res.send(err);
+        //res.send(JSON.stringify(oJSON));
+        oDrinkPongBot.targetCup(req.body.bLaunchAfterTargetLock, data[0].x, data[0].y)
+      });
+      // var fX = utils.getRandomFloat(0,1).toFixed(2);
+      // var fY = utils.getRandomFloat(0,0.25).toFixed(2);
+      // //oIO.emit('cupTargetCoordinatesSetEvent', {sTargetCupX: fX, sTargetCupY: fY}); 
+      // oDrinkPongBot.targetCup(req.body.bLaunchAfterTargetLock, fX, fY)
       res.end();
     },
     postMotorSpeedPercent: (req, res) => {

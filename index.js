@@ -15,11 +15,12 @@ const DrinkPongBot = require('./utils/DrinkPongBot');
 // board and johnny five logic moved to class constructor
 
 var five = require("johnny-five");
-//var board = new five.Board({
-//  port: "/dev/ttyUSB0"
-//});
+var board = new five.Board({
+ // port: "/dev/ttyUSB0"
+ port: "/dev/tty.wchusbserial1420"
+});
 let drinkPongBot, fTheta, fPhi;
-//board.on("ready", function() { // instantiating the drink pong bot inside of the board.on ready function will allow our class sto access the servo methods
+board.on("ready", function() { // instantiating the drink pong bot inside of the board.on ready function will allow our class sto access the servo methods
 
   oThetaServo = new five.Servo({
     pin: 9
@@ -37,7 +38,7 @@ let drinkPongBot, fTheta, fPhi;
     pin: 6
   });
 
-  oDrinkPongBot = new DrinkPongBot(fTheta,fPhi,0,0,0, false, oIO, oThetaServo, oPhiServo, oLaunchLeverServo, oLaunchMotorLeft, oLaunchMotorRight); // theta (degrees), phi (degrees), velocity (m/s) // create an instance of the DrinkPong Bot:
+  oDrinkPongBot = new DrinkPongBot(0,0,0,0,0, true, oIO, oThetaServo, oPhiServo, oLaunchLeverServo, oLaunchMotorLeft, oLaunchMotorRight); // theta (degrees), phi (degrees), velocity (m/s) // create an instance of the DrinkPong Bot:
 
 
   // fTheta, fPhi, fVelocity_0, fTargetCupX, fTargetCupY, bWithBoard
@@ -57,12 +58,5 @@ let drinkPongBot, fTheta, fPhi;
   // all routes of http (GET and POST)
   app.use(routes); // pass the drinkpongbot clob
 
-  // oIO.sockets.on('connection', function (socket) {
-  //   console.log('EMITTING FOR FIRST TIME!!!');
-  //   oIO.emit('cupTargetCoordinatesSetEvent', {sTargetCupX: 100, sTargetCupY: 500});
-  // });
-  //
-  // oIO.emit('initialized');
-
   http.listen(3000);
-//});
+});

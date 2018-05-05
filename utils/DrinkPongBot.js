@@ -40,8 +40,9 @@ class DrinkPongBot {
     this.aCupsRemainingBot = [true,true,true,true,true,true,true,true,true,true];
     this.aCupsRemainingHuman = [true,true,true,true,true,true,true,true,true,true];
     this.fVelocityMax = 4.16; // theoretical max velocity
-    this.fMotorSpeedPercent = fVelocity_0 / this.fVelocityMax;
+    this.fMotorSpeedPercent = 70;
     this.oIO = oIO;
+    this.oLaunchLeverServo.to(180);
     q.push({sTextToSpeak: "Initialization complete. Awaiting commands from UI or info from Pi."});
     this.oIO.emit('drinkPongBotInitialized', {sTheta: fTheta.toString(), });
   }
@@ -97,7 +98,7 @@ class DrinkPongBot {
   launch() {
     q.push({sTextToSpeak: "Launching!"});
     if (this.bWithBoard) {
-	var that = this;
+	     var that = this;
       // jump start the motors
       q.push({sTextToSpeak: "Jump starting and spooling up."});
       //this.jumpStartMotors();
@@ -113,37 +114,20 @@ class DrinkPongBot {
         that.oLaunchLeverServo.to(0);
       }, 2000);
 
-	setTimeout(function() {
-	that.stopMotors()
-	},3000);
+    	setTimeout(function() {
+    	that.stopMotors()
+    	},3000);
 
     }
   }
   startMotors() {
-if (this.bWithBoard) {
-	that.oLaunchMotorLeft.start(this.fMotorSpeedPercent*255);
-       that.oLaunchMotorRight.start(this.fMotorSpeedPercent*255);
-     }
-  }
-  // reset launch servo arm
-  stopMotors() {
-    var that = this;
     if (this.bWithBoard) {
-      // immediately stop motors; ball has launched
-      q.push({sTextToSpeak: "Stopping launch motors!"});
-      this.oLaunchMotorLeft.stop();
-      this.oLaunchMotorRight.stop();
-      // after 2 seconds, return the launch servo back to initial position
-      setTimeout(function() {
-        q.push({sTextToSpeak: "Returning launch lever to initial position."});
-        that.oLaunchLeverServo.to(180); // return the launch servo back to initial position
-      }, 2000);
-
-      setTimeout(function() {
-        q.push({sTextToSpeak: "Launch process should be done!"});
-      }, 2000);
-    }
+      console.log(this.fMotorSpeedPercent);
+  	this.oLaunchMotorLeft.start(this.fMotorSpeedPercent*255);
+    this.oLaunchMotorRight.start(this.fMotorSpeedPercent*255);
+      }
   }
+
   jumpStartMotors() {
     // always need to jumpstart motors
     this.oLaunchMotorLeft.start(255);
@@ -213,11 +197,30 @@ if (this.bWithBoard) {
     this.fMotorSpeedPercent = (iMotorSpeedPercent / 100 ).toFixed(2); // float with 2 decimal
       q.push({sTextToSpeak: "Motor speed set to " + sMotorSpeedPercent + " percent!"});
   }
+  // stopMotors() {
+  //   if (this.bWithBoard) {
+  //     this.oLaunchMotorLeft.stop(); // stop the motors
+  //     this.oLaunchMotorRight.stop();
+  //     q.push({sTextToSpeak: "Motors stopped!"});
+  //   }
+  // }
+  // reset launch servo arm
   stopMotors() {
+    var that = this;
     if (this.bWithBoard) {
-      this.oLaunchMotorLeft.stop(); // stop the motors
+      // immediately stop motors; ball has launched
+      q.push({sTextToSpeak: "Stopping launch motors!"});
+      this.oLaunchMotorLeft.stop();
       this.oLaunchMotorRight.stop();
-      q.push({sTextToSpeak: "Motors stopped!"});
+      // after 2 seconds, return the launch servo back to initial position
+      setTimeout(function() {
+        q.push({sTextToSpeak: "Returning launch lever to initial position."});
+        that.oLaunchLeverServo.to(180); // return the launch servo back to initial position
+      }, 2000);
+
+      setTimeout(function() {
+        q.push({sTextToSpeak: "Launch process should be done!"});
+      }, 4000);
     }
   }
 }
