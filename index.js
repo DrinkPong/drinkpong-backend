@@ -16,11 +16,37 @@ const DrinkPongBot = require('./utils/DrinkPongBot');
 
 var five = require("johnny-five");
 var board = new five.Board({
-  port: "/dev/cu.wchubserial1420"
+  port: "/dev/ttyUSB0"
 });
-let drinkPongBot;
+let drinkPongBot, fTheta, fPhi;
 board.on("ready", function() { // instantiating the drink pong bot inside of the board.on ready function will allow our class sto access the servo methods
-  drinkPongBot = new DrinkPongBot(45,15,0,0,0, true); // theta (degrees), phi (degrees), velocity (m/s) // create an instance of the DrinkPong Bot:
+
+  fTheta = 45;
+  fPhi = 15;
+
+  oThetaServo = new five.Servo({
+    pin: 9,
+    startAt: fTheta,
+    range: [35, 55]
+  });
+  oPhiServo = new five.Servo({
+    pin: 10,
+    startAt: fPhi,
+    range: [0, 30]
+  });
+  oLaunchLeverServo = new five.Servo({
+    pin: 11,
+    startAt: 0,
+    range:[0,45]
+  });
+  oLaunchMotorLeft = new five.Motor({
+    pin: 5
+  });
+  oLaunchMotorRight = new five.Motor({
+    pin: 6
+  });
+
+  oDrinkPongBot = new DrinkPongBot(fTheta,fPhi,0,0,0, true, oIO, oThetaServo, oPhiServo, oLaunchLeverServo, oLaunchMotorLeft, oLaunchMotorRight); // theta (degrees), phi (degrees), velocity (m/s) // create an instance of the DrinkPong Bot:
 
 
   // fTheta, fPhi, fVelocity_0, fTargetCupX, fTargetCupY, bWithBoard
@@ -44,9 +70,8 @@ board.on("ready", function() { // instantiating the drink pong bot inside of the
   //   console.log('EMITTING FOR FIRST TIME!!!');
   //   oIO.emit('cupTargetCoordinatesSetEvent', {sTargetCupX: 100, sTargetCupY: 500});
   // });
-  // 
+  //
   // oIO.emit('initialized');
 
   http.listen(3000);
 });
-

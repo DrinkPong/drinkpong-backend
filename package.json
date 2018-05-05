@@ -24,6 +24,7 @@
   },
   "homepage": "https://github.com/frewinchristopher/beerpong-robot-ui#readme",
   "dependencies": {
+    "async": "^2.6.0",
     "async-sayjs": "^1.0.2",
     "body-parser": "^1.18.2",
     "chuck-norris-jokes": "^0.1.1",

@@ -1,8 +1,8 @@
 'use strict';
 const say = require('say-promise');
 const chuck = require('chuck-norris-jokes');
-var five = require("johnny-five");
-var board = new five.Board();
+// var five = require("johnny-five");
+// var board = new five.Board();
 const dynamics = require('./dynamics');
 const utils = require('./utils');
 const async = require('async');
@@ -21,33 +21,15 @@ var q = async.queue(function(task, callback) {
 // our DrinkPong Bot class - setting the target cup will automatically update our servos to the target
 // (or alternatevely, you can set the velocity, theta, and )
 class DrinkPongBot {
-  constructor(fTheta, fPhi, fVelocity_0, fTargetCupX, fTargetCupY, bWithBoard, oIO) {
+  constructor(fTheta, fPhi, fVelocity_0, fTargetCupX, fTargetCupY, bWithBoard, oIO, oThetaServo, oPhiServo, oLaunchLeverServo, oLaunchMotorLeft, oLaunchMotorRight) {
     q.push({sTextToSpeak: "Initializing."});
-    board.on("ready", function() {
-      this.oThetaServo = new five.Servo({
-        pin: 9,
-        startAt: fTheta,
-        range: [35, 55]
-      });
-      this.oPhiServo = new five.Servo({
-        pin: 10,
-        startAt: fPhi,
-        range: [0, 30]
-      });
-      this.oLaunchLeverServo = new five.Servo({
-        pin: 11,
-        startAt: 0,
-        range:[0,45]
-      });
-      this.oLauchMotorLeft = new five.Motor({
-        pin: 5
-      });
-      this.oLaunchMotorRight = new five.Motor({
-        pin: 6
-      });
-      this.oLaunchLeverServo.on('move:complete', this.launchLeverServoCompleteHandler); // register complete event for the launch servo
-    });
+
     this.bWithBoard = bWithBoard;
+    this.oThetaServo = oThetaServo;
+    this.oPhiServo = oPhiServo;
+    this.oLaunchLeverServo = oLaunchLeverServo;
+    this.oLaunchMotorLeft = oLaunchMotorLeft;
+    this.oLaunchMotorRight = oLaunchMotorRight;
     this.fTheta = fTheta;
     this.fPhi = fPhi;
     this.fVelocity_0 = fVelocity_0;
@@ -60,8 +42,11 @@ class DrinkPongBot {
     this.fVelocityMax = 4.16; // theoretical max velocity
     this.fMotorSpeedPercent = fVelocity_0 / this.fVelocityMax;
     this.oIO = oIO;
-    q.push({sTextToSpeak: "Initialization complete. Awaiting commands from UI or info from Pi."});    
-    this.oIO.emit('drinkPongBotInitialized', {sTheta: fTheta.toString(), })
+    q.push({sTextToSpeak: "Initialization complete. Awaiting commands from UI or info from Pi."});
+    this.oIO.emit('drinkPongBotInitialized', {sTheta: fTheta.toString(), });
+
+    oLaunchLeverServo.on('move:complete', this.launchLeverServoCompleteHandler); // register complete event for the launch servo
+
   }
   // setters on the two angles - when they are updated, we need to issue a command to the servos so they are also updated
   set fTheta(fTheta) {
@@ -73,17 +58,17 @@ class DrinkPongBot {
   set fPhi(fPhi) {
     q.push({sTextToSpeak: "Setting phi to " + fPhi.toString() + " degrees."});
     if (this.bWithBoard) {
-      this.oPhiServo.to(fTheta);
+      this.oPhiServo.to(fPhi);
     }
   }
   set fVelocity_0(fVelocity_0) {
     q.push({sTextToSpeak: "Setting my launch velocity to " + fVelocity_0 + " meters per second."});
-    
+
     // ensure that we don't blow the motor up
     if (fVelocity_0 > this.fVelocityMax) {
       fVelocity_0 = fVelocityMax;
     }
-    
+
     this.fMotorSpeedPercent =  this.fVelocity_0 / this.fVelocityMax; // always between 0 and 1
   }
   set fTargetCupX(fTargetCupX) {
@@ -96,7 +81,7 @@ class DrinkPongBot {
     console.log(bLaunchAfterTargetLock);
     this.fTargetCupX = fTargetCupX;
     this.fTargetCupY = fTargetCupY;
-    q.push({sTextToSpeak: "Setting theta and phi!"}); 
+    q.push({sTextToSpeak: "Setting theta and phi!"});
     this.fTheta = dynamics.getTheta(fTargetCupX);
     this.fPhi = dynamics.getPhi(fTargetCupX, fTargetCupY);
     q.push({sTextToSpeak: "Target is locked on!"});
@@ -108,29 +93,29 @@ class DrinkPongBot {
       }, 2000);
     }
     this.oIO.emit('cupTargetCoordinatesSetEvent', {sTargetCupX: fTargetCupX, sTargetCupY: fTargetCupY});
-    this.oIO.emit('thetaSetEvent', {sTheta: dynamics.getTheta(fTargetCupX)}); 
+    this.oIO.emit('thetaSetEvent', {sTheta: dynamics.getTheta(fTargetCupX)});
     this.oIO.emit('phiSetEvent', {sPhi: dynamics.getPhi(fTargetCupX, fTargetCupY)});
   }
   // push a ball forward into the launcher!
   launch() {
     q.push({sTextToSpeak: "Launching!"});
     if (this.bWithBoard) {
-      
+
       // jump start the motors
-      q.push({sTextToSpeak: "Jump starting and spooling up."}); 
+      q.push({sTextToSpeak: "Jump starting and spooling up."});
       jumpStartMotors();
-      
+
       // after 100 ms jump start, set the actual desired speed
       setTimeout(function() {
         setMotorSpeedPercent(this.fMotorSpeedPercent)
       }, 100);
-      
+
       // after 2 seconds, push the ball into the cannon
       setTimeout(function() {
-        q.push({sTextToSpeak: "Pushing ball into cannon!"}); 
+        q.push({sTextToSpeak: "Pushing ball into cannon!"});
         this.oLaunchLeverServo.to(180,1000);
       }, 2000);
-      
+
     }
   }
   // reset launch servo arm
@@ -138,23 +123,23 @@ class DrinkPongBot {
     var that = this;
     if (this.bWithBoard) {
       // immediately stop motors; ball has launched
-      q.push({sTextToSpeak: "Stopping launch motors!"}); 
+      q.push({sTextToSpeak: "Stopping launch motors!"});
       this.oLauchMotorLeft.stop();
       this.oLauchMotorLeft.stop();
       // after 2 seconds, return the launch servo back to initial position
       setTimeout(function() {
-        q.push({sTextToSpeak: "Returning launch lever to initial position."}); 
+        q.push({sTextToSpeak: "Returning launch lever to initial position."});
         this.oLaunchLeverServo.to(0); // return the launch servo back to initial position
-      }, 2000); 
-      
+      }, 2000);
+
       setTimeout(function() {
-        q.push({sTextToSpeak: "Launch process should be done!"}); 
-      }, 2000); 
+        q.push({sTextToSpeak: "Launch process should be done!"});
+      }, 2000);
     }
   }
   jumpStartMotors() {
     // always need to jumpstart motors
-    this.oLaunchMotorLeft.start(250); 
+    this.oLaunchMotorLeft.start(250);
     this.oLaunchMotorRight.start(250);
   }
   tellJoke() { // wrapper for our bot to use the say speak function
@@ -222,7 +207,7 @@ class DrinkPongBot {
     if (this.bWithBoard) {
       // for any change of motor speed, we need to start the motors with a high value
       jumpStartMotors();
-      
+
       setTimeout(function() {
         this.oLaunchMotorLeft.start(this.fMotorSpeedPercent*255); // the fraction of max to set the motors
         this.oLaunchMotorRight.start(this.fMotorSpeedPercent*255);
