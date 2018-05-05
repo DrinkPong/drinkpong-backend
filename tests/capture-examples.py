@@ -1,8 +1,8 @@
 import numpy as np
 import cv2
 
-LEFT_PATH = "./capture3/left/{:06d}.jpg"
-RIGHT_PATH = "./capture3/right/{:06d}.jpg"
+LEFT_PATH = "./capture/{:06d}.jpg"
+#RIGHT_PATH = "./capture3/right_{:06d}.jpg"
 
 CAMERA_WIDTH = 640
 CAMERA_HEIGHT = 480
@@ -33,7 +33,7 @@ frameId = 0
 
 # Grab both frames first, then retrieve to minimize latency between cameras
 while(True):
-    if not (left.grab() and right.grab()):
+    if not (left.grab()):# and right.grab()):
         print("No more frames")
         break
 
@@ -44,12 +44,11 @@ while(True):
 
     if cv2.waitKey(1) & 0xFF == ord('c'):
         cv2.imwrite(LEFT_PATH.format(frameId), leftFrame)
-        cv2.imwrite(RIGHT_PATH.format(frameId), rightFrame)
+        print('image saved to '+LEFT_PATH.format(frameId))
+        #cv2.imwrite(RIGHT_PATH.format(frameId), rightFrame)
 
     cv2.imshow('left', leftFrame)
-    cv2.imshow('right', rightFrame)
-    if cv2.waitKey(1) & 0xFF == ord('q'):
-        break
+    #cv2.imshow('right', rightFrame)
 
     frameId += 1
 
